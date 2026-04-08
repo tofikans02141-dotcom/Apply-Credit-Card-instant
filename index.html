@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -96,74 +95,50 @@ oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
 </div>
 
 <script>
-// ⏳ TIMER (NO RESET)
-let duration = 300; // 5 min
-let endTime = localStorage.getItem("endTime");
 
-if(!endTime){
-  endTime = new Date().getTime() + duration*1000;
-  localStorage.setItem("endTime", endTime);
-}
+// 🔥 GLOBAL START TIME (CHANGE ONLY THIS ONCE)
+let globalStart = new Date("2026-01-01T00:00:00").getTime();
+
+// ⏳ TIMER (SAME FOR ALL USERS)
+let duration = 300; // 5 min
 
 function updateTimer(){
   let now = new Date().getTime();
-  let remaining = Math.floor((endTime - now)/1000);
 
-  if(remaining <= 0){
-    endTime = new Date().getTime() + duration*1000;
-    localStorage.setItem("endTime", endTime);
-    remaining = duration;
-  }
+  let elapsed = Math.floor((now - globalStart) / 1000);
+  let remaining = duration - (elapsed % duration);
 
-  let m = Math.floor(remaining/60);
-  let s = remaining%60;
-  s = s<10?"0"+s:s;
+  let m = Math.floor(remaining / 60);
+  let s = remaining % 60;
+  s = s < 10 ? "0" + s : s;
 
-  document.getElementById("countdown").innerHTML = m+":"+s;
+  document.getElementById("countdown").innerHTML = m + ":" + s;
 }
 
 setInterval(updateTimer,1000);
 
-// 🔥 USERS (NO RESET)
-let maxUsers = 30;
-let users = localStorage.getItem("liveUsers");
+// 🔥 GLOBAL USERS (SAME FOR ALL USERS)
+// every 20 min +1, max 30
+function updateUsers(){
+  let now = new Date().getTime();
 
-if(!users){
-  users = Math.floor(Math.random()*5)+5;
-  localStorage.setItem("liveUsers", users);
+  let diff = now - globalStart;
+
+  let increase = Math.floor(diff / 1200000); // 20 min
+
+  let users = 5 + increase;
+
+  if(users > 30) users = 30;
+
+  document.getElementById("users").innerHTML = users;
 }
 
-document.getElementById("users").innerHTML = users;
+setInterval(updateUsers,1000);
 
-let lastUpdate = localStorage.getItem("lastUpdateTime");
-let now = new Date().getTime();
+// INITIAL CALL
+updateTimer();
+updateUsers();
 
-if(!lastUpdate){
-  localStorage.setItem("lastUpdateTime", now);
-}
-
-if(now - lastUpdate >= 1200000){
-  if(users < maxUsers){
-    users++;
-    localStorage.setItem("liveUsers", users);
-  }
-  localStorage.setItem("lastUpdateTime", now);
-}
-
-setInterval(()=>{
-  let last = localStorage.getItem("lastUpdateTime");
-  let current = new Date().getTime();
-  let u = parseInt(localStorage.getItem("liveUsers"));
-
-  if(current - last >= 1200000){
-    if(u < maxUsers){
-      u++;
-      localStorage.setItem("liveUsers", u);
-      document.getElementById("users").innerHTML = u;
-    }
-    localStorage.setItem("lastUpdateTime", current);
-  }
-},60000);
 
 // ✅ FORM
 document.getElementById("leadForm").addEventListener("submit",function(e){
@@ -184,9 +159,6 @@ document.getElementById("leadForm").addEventListener("submit",function(e){
     e.preventDefault();
     return;
   }
-
-  let leads = localStorage.getItem("leads") || 0;
-  localStorage.setItem("leads", parseInt(leads)+1);
 
   setTimeout(()=>{
     window.location.href="YOUR_AFFILIATE_LINK";
