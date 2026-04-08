@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Free Credit Card Apply</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+  text-align:center;
+}
+.container { padding:20px; }
+h1 { color:#00ffcc; }
+
+.offer {
+  background:#ff9800;
+  padding:15px;
+  border-radius:10px;
+  color:black;
+}
+
+.timer { font-size:22px; color:#ff3d00; margin-top:10px; }
+
+.live {
+  background:#000;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+}
+
+.box {
+  background:white;
+  color:black;
+  padding:20px;
+  border-radius:10px;
+  margin-top:20px;
+}
+
+input {
+  width:90%;
+  padding:12px;
+  margin:10px;
+}
+
+button {
+  background:#00c853;
+  color:white;
+  padding:12px;
+  width:95%;
+  border:none;
+}
+
+.error { color:red; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>💳 Free Credit Card Apply</h1>
+
+<div class="offer">
+🎁 ₹500 Cashback + Lifetime Free Card
+</div>
+
+<div class="timer">
+⏳ Offer Ends In: <span id="countdown"></span>
+</div>
+
+<div class="live">
+🔥 <span id="users"></span> people applying now
+</div>
+
+<div class="box">
+
+<form id="leadForm" action="https://formspree.io/f/xnjowrzb" method="POST">
+
+<input type="text" id="name" name="name" placeholder="Enter Name" required>
+
+<input type="tel" id="mobile" name="mobile" placeholder="Enter Mobile Number" maxlength="10"
+oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+
+<button type="submit">Apply Now</button>
+
+</form>
+
+<p class="error" id="error"></p>
+
+</div>
+
+</div>
+
+<script>
+// ⏳ TIMER (NO RESET)
+let duration = 300; // 5 min
+let endTime = localStorage.getItem("endTime");
+
+if(!endTime){
+  endTime = new Date().getTime() + duration*1000;
+  localStorage.setItem("endTime", endTime);
+}
+
+function updateTimer(){
+  let now = new Date().getTime();
+  let remaining = Math.floor((endTime - now)/1000);
+
+  if(remaining <= 0){
+    endTime = new Date().getTime() + duration*1000;
+    localStorage.setItem("endTime", endTime);
+    remaining = duration;
+  }
+
+  let m = Math.floor(remaining/60);
+  let s = remaining%60;
+  s = s<10?"0"+s:s;
+
+  document.getElementById("countdown").innerHTML = m+":"+s;
+}
+
+setInterval(updateTimer,1000);
+
+// 🔥 USERS (NO RESET)
+let maxUsers = 30;
+let users = localStorage.getItem("liveUsers");
+
+if(!users){
+  users = Math.floor(Math.random()*5)+5;
+  localStorage.setItem("liveUsers", users);
+}
+
+document.getElementById("users").innerHTML = users;
+
+let lastUpdate = localStorage.getItem("lastUpdateTime");
+let now = new Date().getTime();
+
+if(!lastUpdate){
+  localStorage.setItem("lastUpdateTime", now);
+}
+
+if(now - lastUpdate >= 1200000){
+  if(users < maxUsers){
+    users++;
+    localStorage.setItem("liveUsers", users);
+  }
+  localStorage.setItem("lastUpdateTime", now);
+}
+
+setInterval(()=>{
+  let last = localStorage.getItem("lastUpdateTime");
+  let current = new Date().getTime();
+  let u = parseInt(localStorage.getItem("liveUsers"));
+
+  if(current - last >= 1200000){
+    if(u < maxUsers){
+      u++;
+      localStorage.setItem("liveUsers", u);
+      document.getElementById("users").innerHTML = u;
+    }
+    localStorage.setItem("lastUpdateTime", current);
+  }
+},60000);
+
+// ✅ FORM
+document.getElementById("leadForm").addEventListener("submit",function(e){
+  let name = document.getElementById("name").value.trim();
+  let mobile = document.getElementById("mobile").value.trim();
+  let error = document.getElementById("error");
+
+  error.innerHTML="";
+
+  if(!/^[A-Za-z ]+$/.test(name)){
+    error.innerHTML="❌ Name invalid";
+    e.preventDefault();
+    return;
+  }
+
+  if(!/^[6-9][0-9]{9}$/.test(mobile)){
+    error.innerHTML="❌ Invalid mobile";
+    e.preventDefault();
+    return;
+  }
+
+  let leads = localStorage.getItem("leads") || 0;
+  localStorage.setItem("leads", parseInt(leads)+1);
+
+  setTimeout(()=>{
+    window.location.href="YOUR_AFFILIATE_LINK";
+  },2000);
+});
+</script>
+
+</body>
+</html>
